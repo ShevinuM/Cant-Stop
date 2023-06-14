@@ -1,6 +1,5 @@
 # Saving A Game
-
-Below I'm including my functionality to load/save the game. I use Java Serialization to save / load the game
+Below I'm including my functionality to save the game. I use Java Serialization to save the game
 
 ## Structure 
 - I have a SaveGameGUI class which allows the user to enter the filename and create a file which is passed as a parameter into the saveGame method of the Game class.

@@ -27,7 +27,8 @@ public void saveGame(File file){
     }
 ```
 
-- The user first selects the file from the file picker in GUI
+- The user first types the filename and then the file is saved in the current directory. The reason I did this was so that
+the user won't forget where the files are saved if I allowed to use a file picker. 
 ```java
 userInput = fileNameInputField.getText();
 
@@ -39,3 +40,20 @@ String filePath = currentDirectory + File.separator + userInput + ".ser";
 //Create a file object that represents the location where the game will be saved
 File saveFile = new File(filePath);
 ```
+- I also handled cases where the file is not saved properly.
+   - First is catching the exception because all of the code related to saving the file is inside a `try` block. The 
+   following statement displays an error to the user.
+   ```java
+   catch (IOException ex) {
+      JOptionPane.showMessageDialog(saveGameFrame, "An error occurred while saving the game: " + ex.getMessage());
+   }
+   ```
+   - I also handled the case where the file name is either invalid or it exists. 
+   ```java
+   boolean created = saveFile.createNewFile();
+   if (created) {
+      
+   } else {
+      JOptionPane.showMessageDialog(saveGameFrame, "The specified filename is invalid or already exists.");
+   }
+- After everything if the file is created

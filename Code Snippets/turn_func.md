@@ -142,6 +142,232 @@ This class involves a lot of heavy logic to determine where the cubes must / can
                         }
                         return true;
                         ```
+                3. Now if the user has legal moves with free cubes remaining, i call the moveFreeCubes method. This method has a lot of logic so I'm not explaining every line of code. I'll explain the general idea.
+                    1. The method initially handles some exceptions, then create a hashmap to store the new positions so we can update the positions of the white cubes later.
+                    2. The number of free white cubes is an instance variable of the turn class. I first check if it's 3. If so I use the following logic to move the cubes.
+                        ```java
+                        // if the firstSum is equal to the secondSum then we can only move one cube and we make two moves in that column
+                        if (firstSum == secondSum) {
+                            // Increments cube1 2 steps in the firstSum column.
+                            incrementFreeCubesTwoSteps(firstSum, "cube1");
+                        } else {
+                            setPositionOfFreeCubes(firstSum, "cube1");
+                            if (!columnsClaimedSet.contains(firstSum)) {
+                                cubeToMove = "cube2";
+                            } else {
+                                cubeToMove = "cube1";
+                            }
+                            setPositionOfFreeCubes(secondSum, cubeToMove);
+                        }
+                        ```
+                    3. If the number of free white cubes is 2, I use the following logic to move the cubes.
+                        ```java
+                        int cube1Position = positions.get("cube1")[1];
+                        int columnToUse; // variable to keep track of which column to add the free cube if the cube already on board falls on 1st or 2nd sum
+                        if (firstSum == secondSum) {
+                            /**
+                            *  check if the cube that is not free (which is cube 1 because we add cubes to the board in an orderly manner) is in
+                            *  firstSum column
+                            */
+                            if (positions.get("cube1")[0] == firstSum) {
+                                /**
+                                * Check if the cube is about to be claimed which means it's in the square below the last. If it is, we don't have to
+                                * move the white cube 2 spaces up
+                                */
+                                if (isAboutToBeClaimed(firstSum, cube1Position)) {
+                                    setPositionOfExistingWhiteCubes(firstSum, "cube1", 1);
+                                } else {
+                                    setPositionOfExistingWhiteCubes(firstSum, "cube1", 2);
+                                }
+                            } else {
+                                incrementFreeCubesTwoSteps(firstSum, "cube2");
+                            }
+                        } else {
+                            if (positions.get("cube1")[0] == firstSum) {
+                                newPositions.put("cube1", new int[] {firstSum, cube1Position+1});
+                                whiteCubes.setPosition(newPositions);
+                                columnToUse = secondSum;
+                                setPositionOfFreeCubes(secondSum, "cube2");  
+                            } else if (positions.get("cube1")[0] == secondSum) {
+                                newPositions.put("cube1", new int[] {secondSum, cube1Position+2});
+                                whiteCubes.setPosition(newPositions);
+                                columnToUse = firstSum; 
+                                /**
+                                * We know that the cube 1 is in the column represented by the secondSum so we have to move cube 2 to the column 
+                                * represented by the first sum
+                                */
+                                setPositionOfFreeCubes(firstSum, "cube2");
+                            } else {
+                                setPositionOfFreeCubes(firstSum, "cube2");
+                                if (!columnsClaimedSet.contains(firstSum)) {
+                                    cubeToMove = "cube2";
+                                } else {
+                                    cubeToMove = "cube1";
+                                }
+                                setPositionOfFreeCubes(firstSum, cubeToMove);
+                                
+                            }
+                                
+                        }
+                        ```
+                    4. If the number of free white cubes is 1, I use the following logic.
+                        ```java
+                        int cube1Position = positions.get("cube1")[1];
+                        int cube2Position = positions.get("cube2")[1];
+                        if (firstSum == secondSum) {
+
+                            /**
+                            *  check if cube 1 is in firstSum column
+                            */
+                            if (positions.get("cube1")[0] == firstSum) {
+                                /**
+                                * Check if the cube is about to be claimed which means it's in the square below the last. If it is, we don't have to
+                                * move the white cube 2 spaces up
+                                */
+                                if (isAboutToBeClaimed(firstSum, cube1Position)) {
+                                    setPositionOfExistingWhiteCubes(firstSum, "cube1", 1);
+                                } else {
+                                    setPositionOfExistingWhiteCubes(firstSum, "cube1", 2);
+                                }
+                            } else if (positions.get("cube2")[0] == firstSum) {
+                                /**
+                                * Check if the cube is about to be claimed which means it's in the square below the last. If it is, we don't have to
+                                * move the white cube 2 spaces up
+                                */
+                                if (isAboutToBeClaimed(firstSum, cube2Position)) {
+                                    setPositionOfExistingWhiteCubes(firstSum, "cube2", 1);
+                                } else {
+                                    setPositionOfExistingWhiteCubes(firstSum, "cube2", 2);
+                                }
+                            } else {
+                                incrementFreeCubesTwoSteps(firstSum, "cube3");
+                            }
+                                    
+                        } else {
+                            
+                            if (positions.get("cube1")[0] == firstSum) {
+                                setPositionOfExistingWhiteCubes(firstSum, "cube1", 1);
+                                
+                                if (positions.get("cube2")[0] == secondSum) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube2", 1);
+                                    
+                                } else {
+                                    setPositionOfFreeCubes(secondSum, "cube3");
+                                }
+                                
+                            } else {
+                                if (positions.get("cube1")[0] == secondSum) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube1", 1);
+                                    
+                                    if (positions.get("cube2")[0] == firstSum) {
+                                        setPositionOfExistingWhiteCubes(firstSum, "cube2", 1);
+                                    } else {
+                                        setPositionOfFreeCubes(firstSum, "cube3");
+                                    }
+                                } else {
+                                    if (positions.get("cube2")[0] == firstSum) {
+                                        setPositionOfExistingWhiteCubes(firstSum, "cube2", 1);
+                                        setPositionOfFreeCubes(secondSum, "cube3");
+                                    } else {
+                                        if (positions.get("cube2")[0] == secondSum) {
+                                            setPositionOfExistingWhiteCubes(secondSum, "cube2", 1);
+                                            setPositionOfFreeCubes(firstSum, "cube3");
+                                        } else {
+                                            int selectedSum = SumDialogBox.showSumDialogBox(firstSum, secondSum);
+                                            if (selectedSum == firstSum) {
+                                                setPositionOfFreeCubes(firstSum, "cube3");
+                                            } else if (selectedSum == secondSum){
+                                                setPositionOfFreeCubes(secondSum, "cube3");
+                                            }
+                                        }
+                                    }
+                                }
+                                
+                            }
+                        }
+                    5. The code I included above involves a lot of logic since there's multiple possible combinations. I have debugged the code with various test cases and it resulted in the correct output. If you read the logic carefully, all of the possible combinations are covered.
+                    6. The above method uses other methods to set the position of free cubes and I'll explain those here.
+                        1. setPositionOfFreeCubes is used to set the position of free cubes. It takes in a cube number and a sum (which corresponds to the column) and the sets the position of the cube. It also checks if the user has any coloured cubes placed in the column from previous turns. If so we set it one above the coloured cubes. Here's how I set it if for example the player's colour was red.
+                            ```java
+                            if (!columnsClaimedSet.contains(sum)) {
+                                if (CubePositions.RedCubePositions.cubeExistsInColumn(sum)) {
+                                columnPosition = CubePositions.RedCubePositions.getPosition(sum);
+                                System.out.println(columnPosition + 1);
+                                newPositions.put(cubeNumber, new int[] {sum, columnPosition + 1});
+                                } else {
+                                    newPositions.put(cubeNumber, new int[] {sum, 1});
+                                }
+                            }
+                            whiteCubes.setPosition(newPositions);
+                            ```
+                        2. setPositionOfExistingWhiteCubes is used to set the position of white cubes already on the board. It takes in the column number, cube number and number of steps (1 or 2 steps). 
+                            ```java
+                            int cubePosition = positions.get(cubeNumber)[1];
+                            newPositions.put(cubeNumber, new int[] {sum, cubePosition + numberOfPositions});
+                            whiteCubes.setPosition(newPositions);
+                            ```
+                        3. incrementFreeCubesTwoSteps is used to increment a free cube two steps. It takes in the column number and cube number. It handles edge cases such as instances where the move is 2 steps but the column will be claimed in 1 step. This is just one edge case that's handled, there's more in the code. For example, here's how I increment a free cube by two steps if the player is red.
+                            ```java
+                            // Below line checks if the user already has a red cube in the column
+                            if (CubePositions.RedCubePositions.cubeExistsInColumn(sum)) {
+                                columnPosition = CubePositions.RedCubePositions.getPosition(sum);
+                                /**
+                                *  Checks if the column is about to be claimed which means the red cube is on the square below the last. If so
+                                *  we don't increment the columnPosition by 2
+                                */
+                                if (isAboutToBeClaimed(sum, columnPosition)) {
+                                    newPositions.put(cubeNumber, new int[] {sum, columnPosition + 1});
+                                } else {
+                                    newPositions.put(cubeNumber, new int[] {sum, columnPosition + 2});
+                                }
+                            } else {
+                                newPositions.put(cubeNumber, new int[] {sum, 2});
+                            }
+                            whiteCubes.setPosition(newPositions);
+                            ```
+                        4. isAboutToBeClaimed is used to check if a column is about to be claimed (1 step away from getting claimed). If so it returns true. I do this by comparing the number of rows a column has with the current position.
+                            ```java
+                            if (columnNumber == 2 || columnNumber == 12) {
+                                if (columnPosition == 2) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else if (columnNumber == 3 || columnNumber == 11 ) {
+                                if (columnPosition == 4) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else if (columnNumber == 4 || columnNumber == 10) {
+                                if (columnPosition == 6) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else if (columnNumber == 5 || columnNumber == 9) {
+                                if (columnPosition == 8) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else if (columnNumber == 6 || columnNumber == 8) {
+                                if (columnPosition == 10) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else if (columnNumber == 7) {
+                                if (columnPosition == 12) {
+                                    return true;
+                                } else {
+                                    return false;
+                                }
+                            } else {
+                                return false;
+                            }
+                            ```
+
 
     	
 

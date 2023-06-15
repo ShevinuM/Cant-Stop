@@ -547,12 +547,13 @@ This functionality involves a lot of heavy logic to determine where the cubes mu
 - If the player gets busted, the cube positions are reset back to their initial position before the turn began. The way I do this is using the instance variable which stores the state of the cubes before the turn begins. After the turn ends, I reset the cube Positions in the storage class to what I have in the instance variables.
     ```java
     if (getPlayer().getColour().equals(Color.RED)) {
-    		for (Map.Entry<String, Integer> entry : redCubePositions.entrySet()) {
-    		    String key = entry.getKey();
-    		    Integer value = entry.getValue();
-    		    CubePositions.RedCubePositions.setPosition(key, value);
-    		}
-    	}
+        for (Map.Entry<String, Integer> entry : redCubePositions.entrySet()) {
+            String key = entry.getKey();
+            Integer value = entry.getValue();
+            CubePositions.RedCubePositions.setPosition(key, value);
+        }
+    }
+    ```
 
 
     	

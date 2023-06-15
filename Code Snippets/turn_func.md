@@ -1,8 +1,8 @@
 # Taking A Turn
-This class involves a lot of heavy logic to determine where the cubes must / can be placed based on the current status of the board since there's a lot of possibilities.
+This functionality involves a lot of heavy logic to determine where the cubes must / can be placed based on the current status of the board since there's a lot of possibilities.
 
 ## Structure
-- I'm only going to include the neccesary instance variables here.
+- There's a lot of methods, instance variables and classes involved in this functionality. I'll try to explain the structure as best as I can but I'm not including all of them here. I'll only include the most important ones. If you run the game, there might be some bugs related to the colours of the board updating later than expected but this is a GUI bug and I have throughly tested the backend and my data structures are updating properly. The functionality also works as expected.
 
 ## Logic
 - When the user clicks the start game button, a new instance of the turn class is created. Then the roll dice button is visible and game has started. The text of the start game button also changes to End Turn, so the same button is used to start the game and end the turn.
@@ -367,6 +367,192 @@ This class involves a lot of heavy logic to determine where the cubes must / can
                                 return false;
                             }
                             ```
+                        5. cubeExistsInColumn is a method of the cube storage class which given a column returns if a cube of that colour exists or not.
+                4. If the player doesn't have free cubes to move, then i call the method moveCubesOnBoard which moves cubes on the board. This is the logic behind moving cubes of board which handles all edge cases.
+                    ```java
+                    if (firstSum == secondSum) {
+                        if (positions.get("cube1")[0] == firstSum) {
+                            cubeToMove = "cube1";
+                        } else if (positions.get("cube2")[0] == firstSum) {
+                            cubeToMove = "cube2";
+                        } else if (positions.get("cube3")[0] == firstSum) {
+                            cubeToMove = "cube3";
+                        } else {
+                            cubeToMove = "noCube";
+                        }
+                        if (!cubeToMove.equals("noCube")) {
+                            int cubePosition = positions.get(cubeToMove)[1];
+                            if (isAboutToBeClaimed(firstSum, cubePosition)) {
+                                    setPositionOfExistingWhiteCubes(firstSum, cubeToMove, 1);
+                            } else {
+                                if (!isClaimed(firstSum, cubePosition)) {
+                                    setPositionOfExistingWhiteCubes(firstSum, cubeToMove, 2);
+                                }
+                            }
+                        }
+                    } else {
+                        if (positions.get("cube1")[0] == firstSum) {
+                            if(!isClaimed(firstSum, positions.get("cube1")[1])) {
+                                setPositionOfExistingWhiteCubes(firstSum, "cube1", 1);
+                            }
+                            if (positions.get("cube2")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube2")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube2", 1);
+                                }
+                            } else if (positions.get("cube3")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube3")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube3", 1);
+                                }
+                            }
+                        } else if (positions.get("cube2")[0] == firstSum) {
+                            if (!isClaimed(firstSum, positions.get("cube2")[1])) {
+                                setPositionOfExistingWhiteCubes(firstSum, "cube2", 1);
+                            }
+                            if (positions.get("cube1")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube1")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube1", 1);
+                                }
+                            } else if (positions.get("cube3")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube3")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube3", 1);
+                                }
+                            }
+                        } else if (positions.get("cube3")[0] == firstSum) {
+                            if (!isClaimed(firstSum, positions.get("cube3")[1])) {
+                                setPositionOfExistingWhiteCubes(firstSum, "cube3", 1);
+                            }
+                            if (positions.get("cube2")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube2")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube2", 1);
+                                }
+                            } else if (positions.get("cube1")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube1")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube1", 1);
+                                }
+                            }
+                        } else {
+                            if (positions.get("cube1")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube1")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube1", 1);
+                                }
+                            } else if (positions.get("cube2")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube2")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube2", 1);
+                                }
+                            } else if (positions.get("cube3")[0] == secondSum) {
+                                if (!isClaimed(secondSum, positions.get("cube3")[1])) {
+                                    setPositionOfExistingWhiteCubes(secondSum, "cube3", 1);
+                                }
+                            }
+                        }
+                    }
+                5. After the cubes have moved, it's time to check if there is a winner. To do this, I get the columns claimed by each player. 
+                    ```java
+                    HashMap<String, HashSet<Integer>> columnsClaimedWithPlayers = currentGame.getColumnsClaimed();
+                    ```
+                    This is a hashmap mapping the player name to a set which contains the columns that the player has claimed.
+                    ```
+                6. I then check if any of the players have claimed 3 columns. If so, I pass the name to the winnerGUI and end the game
+                    ```java
+                    for (Map.Entry<String, HashSet<Integer>> entry : columnsClaimedWithPlayers.entrySet()) {
+                        String key = entry.getKey();
+                        HashSet<Integer> value = entry.getValue();
+                        int size = value.size();
+                        if (size == 3) {
+                            // end game
+                            WinnerDialog winnerDialog = new WinnerDialog();
+                            winnerDialog.show(key);
+                            try{
+                                Thread.sleep(5000);
+                            }
+                            catch (InterruptedException ex){
+                                ex.printStackTrace();
+                            }
+                            gameGUI.dispose();
+                        }
+                    }
+                    ```
+
+            4. Now finally I check if a cube has moved. If so, I return true. The white cubes have moved in the backend and my colleague implemented the frontend to show the movement of the cube.
+            5. I finally call the setPositions method of the turn class to change the positions of the coloured cubes. Here's how it's done.
+                1. First the setPositions method determines the column each white cube is located at and calls the setColouredCubePositions method passing the column number and position.
+                    ```java
+                    int[] cube1 = whiteCubes.getPositions().get("cube1");
+                    int[] cube2 = whiteCubes.getPositions().get("cube2");
+                    int[] cube3 = whiteCubes.getPositions().get("cube3");
+                    int[][]cubes = {cube1, cube2, cube3};
+                    int[] columnPosition;
+                    for (int i=0 ; i < cubes.length; i++) {
+                        columnPosition = cubes[i];
+                        if (columnPosition[0] == 2) {
+                            setColoredCubePositions("col2", columnPosition[1]);
+                        } else if (columnPosition[0] == 3) {
+                            setColoredCubePositions("col3", columnPosition[1]);
+                        } else if (columnPosition[0] == 4) {
+                            setColoredCubePositions("col4", columnPosition[1]);
+                        } else if (columnPosition[0] == 5) {
+                            setColoredCubePositions("col5", columnPosition[1]);
+                        } else if (columnPosition[0] == 6) {
+                            setColoredCubePositions("col6", columnPosition[1]);
+                        } else if (columnPosition[0] == 7) {
+                            setColoredCubePositions("col7", columnPosition[1]);
+                        } else if (columnPosition[0] == 8) {
+                            setColoredCubePositions("col8", columnPosition[1]);
+                        } else if (columnPosition[0] == 9) {
+                            setColoredCubePositions("col9", columnPosition[1]);
+                        } else if (columnPosition[0] == 10) {
+                            setColoredCubePositions("col10", columnPosition[1]);
+                        } else if (columnPosition[0] == 11) {
+                            setColoredCubePositions("col11", columnPosition[1]);
+                        } else if (columnPosition[0] == 12) {
+                            setColoredCubePositions("col12", columnPosition[1]);
+                        }
+                    }
+                    ```
+                2. The setColoredCubePositions determines the current colour and sets the position accordingly. For example, here's how it sets if the colour is red.
+                    ```java
+                    if (currentColor.equals(Color.RED)) {
+                        CubePositions.RedCubePositions.setPosition(column, columnPosition);
+                    }
+                    ```
+- When the dice has rolled. The user can either continue until the player get busted or the player can end the turn. If the player ends the turn the turn, then the columns claimed during the turn gets updated. Here's how it's done.
+    - First I call the updateColumnsClaimed method of the turn class. This method takes in the current player and the game as parameters.
+        ```java
+        turn.updateColumnsClaimed(currentPlayer, game);
+        ```       
+    - Then this method call addToColumnsClaimed method
+        ```java
+        String playerName = currentPlayer.getName();
+		if (currentPlayer.getColour().equals(Color.RED)) {
+			for (Map.Entry<String, Integer> entry : CubePositions.RedCubePositions.returnRedCubePositions().entrySet()) {
+				addToColumnsClaimed(entry, playerName, gameInProgress);
+			}
+		}
+        ```
+    -  This method checks if the column has been claimed by the player and calls the addToColumnsClaimed method of the Game class.
+        ```java
+        String key = entry.getKey();
+	    Integer value = entry.getValue();
+	    int colNumber = Integer.parseInt(key.substring(3));
+	    if (isClaimed(colNumber, value)) {
+	    	gameInProgress.addToColumnsClaimed(playerName, colNumber);
+	    }
+        ```
+    - This method updates the HashMap mapping each player to the Set consisting of the columns each player has claimed. This is an instance variable and this variable exists untill the Game ends providing a way to keep track of the columns claimed by the players throughout the game.
+        ```java
+        HashSet<Integer> set = columnsClaimed.get(name);
+    	set.add(column);
+    	columnsClaimed.put(name, set);
+        ```
+- If the player gets busted, the cube positions are reset back to their initial position before the turn began. The way I do this is using the instance variable which stores the state of the cubes before the turn begins. After the turn ends, I reset the cube Positions in the storage class to what I have in the instance variables.
+    ```java
+    if (getPlayer().getColour().equals(Color.RED)) {
+    		for (Map.Entry<String, Integer> entry : redCubePositions.entrySet()) {
+    		    String key = entry.getKey();
+    		    Integer value = entry.getValue();
+    		    CubePositions.RedCubePositions.setPosition(key, value);
+    		}
+    	}
 
 
     	
